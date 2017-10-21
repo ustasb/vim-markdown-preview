@@ -7,6 +7,8 @@ let g:vmp_script_path = resolve(expand('<sfile>:p:h'))
 
 let g:vmp_osname = 'Unidentified'
 
+let g:bu_decrypt = 'gpg --decrypt --local-user brianustas@gmail.com'
+
 if has('win32') || has('win64')
   " Not yet used
   let g:vmp_osname = 'win32'
@@ -64,13 +66,14 @@ endif
 
 function! Vim_Markdown_Preview()
   let b:curr_file = expand('%:p')
+  let b:printer = b:curr_file =~ '\.asc$' ? g:bu_decrypt : 'cat'
 
   if g:vim_markdown_preview_github == 1
     call system('grip "' . b:curr_file . '" --export /tmp/vim-markdown-preview.html --title vim-markdown-preview.html')
   elseif g:vim_markdown_preview_perl == 1
     call system('Markdown.pl "' . b:curr_file . '" > /tmp/vim-markdown-preview.html')
   elseif g:vim_markdown_preview_pandoc == 1
-    call system('pandoc ' . g:vim_markdown_preview_pandoc_args . ' "' . b:curr_file . '" > /tmp/vim-markdown-preview.html')
+    call system(b:printer . ' "' . b:curr_file . '" | pandoc ' . g:vim_markdown_preview_pandoc_args . ' > /tmp/vim-markdown-preview.html')
   else
     call system('markdown "' . b:curr_file . '" > /tmp/vim-markdown-preview.html')
   endif
@@ -118,13 +121,14 @@ endfunction
 "Renders html locally and displays images
 function! Vim_Markdown_Preview_Local()
   let b:curr_file = expand('%:p')
+  let b:printer = b:curr_file =~ '\.asc$' ? g:bu_decrypt : 'cat'
 
   if g:vim_markdown_preview_github == 1
     call system('grip "' . b:curr_file . '" --export vim-markdown-preview.html --title vim-markdown-preview.html')
   elseif g:vim_markdown_preview_perl == 1
     call system('Markdown.pl "' . b:curr_file . '" > /tmp/vim-markdown-preview.html')
   elseif g:vim_markdown_preview_pandoc == 1
-    call system('pandoc ' . g:vim_markdown_preview_pandoc_args . ' "' . b:curr_file . '" > /tmp/vim-markdown-preview.html')
+    call system(b:printer . ' "' . b:curr_file . '" | pandoc ' . g:vim_markdown_preview_pandoc_args . ' > /tmp/vim-markdown-preview.html')
   else
     call system('markdown "' . b:curr_file . '" > vim-markdown-preview.html')
   endif
